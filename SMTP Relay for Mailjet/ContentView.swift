@@ -38,7 +38,7 @@ struct ContentView: View {
                     Circle()
                         .fill(relayManager.isRunning ? .green : .gray)
                         .frame(width: 8, height: 8)
-                    Text(relayManager.isRunning ? "Running on port \(port)" : "Stopped")
+                    Text(relayManager.isRunning ? "Running on port \(String(port))" : "Stopped")
                         .font(.subheadline)
                 }
 
@@ -75,7 +75,7 @@ struct ContentView: View {
                     .textFieldStyle(.roundedBorder)
                     .frame(width: 100)
 
-                Text("Configure applications to use:\nlocalhost:\(port) as the SMTP server.\nNo authentication required.")
+                Text("Configure applications to use:\nlocalhost:\(String(port)) as the SMTP server.\nNo authentication required.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }

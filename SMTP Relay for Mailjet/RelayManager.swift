@@ -78,13 +78,13 @@ final class RelayManager {
         self.server = server
 
         server.onLog = { [weak self] message in
-            Task { @MainActor in
+            Task { @MainActor [weak self] in
                 self?.addLog(message)
             }
         }
 
         server.onStateChanged = { [weak self] running in
-            Task { @MainActor in
+            Task { @MainActor [weak self] in
                 self?.isRunning = running
                 if running {
                     self?.startRetryLoop()
@@ -93,7 +93,7 @@ final class RelayManager {
         }
 
         server.onMessageReceived = { [weak self] message in
-            Task { @MainActor in
+            Task { @MainActor [weak self] in
                 await self?.relayMessage(message)
             }
         }

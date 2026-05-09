@@ -10,18 +10,18 @@ struct EmailMessage: Sendable {
         let name: String?
     }
 
-    var subject: String {
+    nonisolated var subject: String {
         headerValue(for: "Subject") ?? "(no subject)"
     }
 
-    var parsedFrom: ParsedAddress {
+    nonisolated var parsedFrom: ParsedAddress {
         if let fromHeader = headerValue(for: "From") {
             return Self.parseAddress(fromHeader)
         }
         return ParsedAddress(email: envelopeFrom, name: nil)
     }
 
-    var parsedTo: [ParsedAddress] {
+    nonisolated var parsedTo: [ParsedAddress] {
         if let toHeader = headerValue(for: "To") {
             return toHeader.split(separator: ",").map {
                 Self.parseAddress(String($0).trimmingCharacters(in: .whitespaces))
@@ -30,7 +30,7 @@ struct EmailMessage: Sendable {
         return envelopeTo.map { ParsedAddress(email: $0, name: nil) }
     }
 
-    var textBody: String? {
+    nonisolated var textBody: String? {
         let contentType = headerValue(for: "Content-Type") ?? "text/plain"
         if contentType.contains("multipart/") {
             return extractMimePart(targetType: "text/plain")
@@ -41,7 +41,7 @@ struct EmailMessage: Sendable {
         return body
     }
 
-    var htmlBody: String? {
+    nonisolated var htmlBody: String? {
         let contentType = headerValue(for: "Content-Type") ?? "text/plain"
         if contentType.contains("multipart/") {
             return extractMimePart(targetType: "text/html")
@@ -52,14 +52,14 @@ struct EmailMessage: Sendable {
         return nil
     }
 
-    private var body: String {
+    nonisolated private var body: String {
         guard let range = rawData.range(of: "\r\n\r\n") else {
             return rawData
         }
         return String(rawData[range.upperBound...])
     }
 
-    private func headerValue(for name: String) -> String? {
+    nonisolated private func headerValue(for name: String) -> String? {
         let lines = rawData.components(separatedBy: "\r\n")
         for (index, line) in lines.enumerated() {
             if line.isEmpty { break }
@@ -82,7 +82,7 @@ struct EmailMessage: Sendable {
         return nil
     }
 
-    private func extractMimePart(targetType: String) -> String? {
+    nonisolated private func extractMimePart(targetType: String) -> String? {
         let mainContentType = headerValue(for: "Content-Type") ?? ""
         guard let boundary = extractBoundary(from: mainContentType) else { return nil }
 
@@ -103,7 +103,7 @@ struct EmailMessage: Sendable {
         return nil
     }
 
-    private func extractBoundary(from contentType: String) -> String? {
+    nonisolated private func extractBoundary(from contentType: String) -> String? {
         let parts = contentType.components(separatedBy: ";")
         for part in parts {
             let trimmed = part.trimmingCharacters(in: .whitespaces)
@@ -116,7 +116,7 @@ struct EmailMessage: Sendable {
         return nil
     }
 
-    static func parseAddress(_ address: String) -> ParsedAddress {
+    nonisolated static func parseAddress(_ address: String) -> ParsedAddress {
         let trimmed = address.trimmingCharacters(in: .whitespaces)
         if let ltIdx = trimmed.firstIndex(of: "<"),
            let gtIdx = trimmed.firstIndex(of: ">"),

@@ -93,9 +93,9 @@ enum SMTPServerError: Error, LocalizedError {
 // MARK: - SMTP Connection Handler
 
 private final class SMTPConnection: @unchecked Sendable {
-    nonisolated(unsafe) let id: UUID
-    nonisolated(unsafe) private let connection: NWConnection
-    nonisolated(unsafe) private let queue: DispatchQueue
+    let id: UUID
+    private let connection: NWConnection
+    private let queue: DispatchQueue
     nonisolated(unsafe) private var buffer = Data()
     nonisolated(unsafe) private var sessionState: SessionState = .connected
     nonisolated(unsafe) private var envelopeFrom = ""
@@ -106,8 +106,17 @@ private final class SMTPConnection: @unchecked Sendable {
     nonisolated(unsafe) var onLog: ((String) -> Void)?
     nonisolated(unsafe) var onDisconnected: (() -> Void)?
 
-    enum SessionState {
+    enum SessionState: Sendable, Equatable {
         case connected, ready, receivingData
+
+        nonisolated static func == (lhs: SessionState, rhs: SessionState) -> Bool {
+            switch (lhs, rhs) {
+            case (.connected, .connected), (.ready, .ready), (.receivingData, .receivingData):
+                return true
+            default:
+                return false
+            }
+        }
     }
 
     nonisolated init(id: UUID, connection: NWConnection, queue: DispatchQueue) {

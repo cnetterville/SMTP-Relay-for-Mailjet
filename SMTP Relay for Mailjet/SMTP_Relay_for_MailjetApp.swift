@@ -7,7 +7,7 @@ struct SMTP_Relay_for_MailjetApp: App {
     @AppStorage("hideDockIcon") private var hideDockIcon = false
 
     var body: some Scene {
-        WindowGroup {
+        Window("SMTP Relay for Mailjet", id: "main") {
             ContentView(relayManager: relayManager)
                 .onAppear {
                     if hideDockIcon {
@@ -18,17 +18,22 @@ struct SMTP_Relay_for_MailjetApp: App {
         .windowResizability(.contentMinSize)
 
         MenuBarExtra {
-            menuContent
+            MenuBarContent(relayManager: relayManager, port: port)
         } label: {
             Image(systemName: relayManager.isRunning ? "envelope.fill" : "envelope")
         }
         .menuBarExtraStyle(.menu)
     }
+}
 
-    @ViewBuilder
-    private var menuContent: some View {
+struct MenuBarContent: View {
+    let relayManager: RelayManager
+    let port: Int
+    @Environment(\.openWindow) private var openWindow
+
+    var body: some View {
         if relayManager.isRunning {
-            Text("Running on port \(port)")
+            Text("Running on port \(port, format: .number.grouping(.never))")
             Text("Relayed: \(relayManager.messagesRelayed) | Failed: \(relayManager.messagesFailed)")
             if !relayManager.retryQueue.isEmpty {
                 Text("\(relayManager.retryQueue.count) pending retries")
@@ -48,10 +53,8 @@ struct SMTP_Relay_for_MailjetApp: App {
         Divider()
 
         Button("Show Window") {
+            openWindow(id: "main")
             NSApp.activate(ignoringOtherApps: true)
-            for window in NSApp.windows where window.canBecomeMain {
-                window.makeKeyAndOrderFront(nil)
-            }
         }
 
         Divider()
